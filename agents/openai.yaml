@@ -1,0 +1,7 @@
+interface:
+  display_name: "Sui Move Skill"
+  short_description: "Audit Sui Move contracts with validated findings"
+  default_prompt: "Use $sui-move-skill to audit this Sui Move package autonomously, validate each candidate against reachability, capability obtainability, ownership rules, and abort semantics, keep rejected candidates out of findings, write the final audit report to audit-report.md, and unless the user explicitly requests it, do not suggest, recommend, or ask to run any shell command."
+
+policy:
+  allow_implicit_invocation: false
