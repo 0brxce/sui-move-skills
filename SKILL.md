@@ -1,6 +1,6 @@
 ---
-name: sui-move-skill
-description: Use only for full Sui Move security audits that validate exploitability and produce a structured audit report. Do not use for general Sui Move questions, workflow discussions, skill-maintenance tasks, or ordinary code explanation unless the user explicitly invokes $sui-move-skill or clearly asks for a full audit.
+name: sui-move-auditor
+description: Use only for full Sui Move security audits that validate exploitability and produce a structured audit report. Do not use for general Sui Move questions, workflow discussions, skill-maintenance tasks, or ordinary code explanation unless the user explicitly invokes $sui-move-auditor or clearly asks for a full audit.
 ---
 
 # Sui Move Skill
@@ -156,12 +156,6 @@ Use `references/severity.md` for default risk and confidence assignment.
 
 ## Invocation
 
-Explicit skill invocation inside Codex uses `$sui-move-skill`.
-
-If a shell wrapper is available, it can be launched as:
-
-```bash
-sui-move-skill /path/to/project
-```
+Explicit skill invocation inside Codex uses `$sui-move-auditor`.
 
 The wrapper should start Codex in the target project and use this skill to generate `audit-report.md` by default.
