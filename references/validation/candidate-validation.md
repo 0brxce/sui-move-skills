@@ -43,4 +43,4 @@ Keep a short internal note for each candidate using this structure:
 
 - If the path is reachable only through admin intent that matches the documented trust model, reject it.
 - If the path depends on an upgrade, migration, or governance action that is not code-provable, move it to `Unknown` unless the code itself exposes the break.
-- If the issue is only a pattern match from `checklist.md`, reject it until code-specific evidence exists.
+- If the issue is only a pattern match from `references/checks/check-router.md` or a routed check file, reject it until code-specific evidence exists.
