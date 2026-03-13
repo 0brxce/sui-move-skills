@@ -13,7 +13,7 @@ Read supporting references only when they are needed:
 - `references/pre-audit/scoping.md` during initial package inventory and trust-boundary mapping
 - `references/pre-audit/review-lens.md` before deep review and during false-positive validation
 - `references/validation/candidate-validation.md` when turning a candidate into a validated finding or rejecting it
-- `references/validation/sui-framework-reference.md` when validation depends on Sui framework or Move stdlib semantics
+- `references/validation/sui-framework.md` when validation depends on Sui framework or Move stdlib semantics
 - `references/validation/false-positive-filters.md` during the false-positive pass
 - `references/reporting/report-formatting.md` before assembling the final report
 - `references/reporting/severity.md` when assigning risk and confidence
@@ -59,11 +59,11 @@ Use `references/workflow.md` for the full step-by-step procedure.
 - Prefer package-wide reasoning over isolated lint-style comments.
 - Use `references/checks/check-router.md` for depth and coverage, not as a substitute for code-backed reasoning.
 - Execute the full audit flow autonomously until the final report file has been written unless a critical input is missing or the target is ambiguous.
-- Keep this skill strictly static-analysis driven by default.
-- Do not run tests, build commands, or package commands such as `sui move test`, `sui move build`, or similar verification commands unless the user explicitly overrides this instruction.
-- Do not ask the user for permission to execute shell commands as part of the default audit flow. If static analysis is sufficient, continue to the report without pausing for command approval.
-- If dynamic validation would normally help but is not explicitly requested, record the limitation in the report and continue with code-backed static analysis instead of asking to execute commands.
-- When exploitability or safety depends on Sui framework behavior, cross-check the relevant module semantics against the canonical sources described in `references/validation/sui-framework-reference.md`.
+- Keep this skill source-first, but always run `MOVE_HOME=<workspace>/.move sui move build` once near the start of the audit so the package materializes pinned dependency sources under `build/<package-name>/sources/dependencies` without relying on the user's home directory.
+- Do not run tests or package commands such as `sui move test` unless the user explicitly requests additional dynamic verification.
+- Do not ask the user for permission to execute the default audit commands. Execute the required build step autonomously with a workspace-local `MOVE_HOME`, then continue with source-backed validation.
+- If the required build step fails or cannot resolve the exact dependency revision, record the limitation and continue with the best available source-backed validation rather than pausing for command approval.
+- When exploitability or safety depends on Sui framework behavior, cross-check the relevant module semantics against the canonical sources described in `references/validation/sui-framework.md`.
 - Call out uncertainty explicitly when assumptions about off-chain components, package deployment, or governance are missing.
 
 ## Invocation

@@ -21,7 +21,7 @@ Answer these for each candidate before reporting it:
 5. Does the attack still work after applying abort semantics and PTB composition rules?
 6. What invariant, authorization boundary, or custody property is broken if the transaction succeeds?
 7. Is the outcome concrete enough to matter: theft, unauthorized privilege, stuck funds, irreversible state breakage, or meaningful denial of service?
-8. Does the conclusion rely on Sui framework or Move stdlib semantics, and if so, has the relevant upstream module been cross-checked?
+8. Does the conclusion rely on Sui framework or Move stdlib semantics, and if so, has the relevant dependency module been cross-checked from the best available local, vendored, or upstream source?
 
 If any of questions 1 through 6 cannot be answered from the target code and realistic assumptions, do not mark the issue `Validated`.
 If question 8 applies and the framework behavior has not been verified, prefer `Unknown` or keep the candidate unreported until the semantics are confirmed.

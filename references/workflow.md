@@ -52,10 +52,10 @@ Before promoting a candidate issue into a finding, confirm:
 - the invariant break survives transaction abort semantics
 - the issue is not merely an intended admin power or documented trust assumption
 - the impact is concrete: theft, unauthorized control, stuck funds, permanent breakage, or meaningful denial of service
-- if the conclusion depends on Sui framework or Move stdlib behavior, the relevant upstream module semantics have been cross-checked
+- if the conclusion depends on Sui framework or Move stdlib behavior, the relevant dependency module semantics have been cross-checked from the best available local, vendored, or upstream source
 
 Use `references/validation/candidate-validation.md` as the validation checklist and status model for each candidate.
-Use `references/validation/sui-framework-reference.md` whenever validation depends on framework-defined semantics rather than only on target-project code.
+Use `references/validation/sui-framework.md` whenever validation depends on framework-defined semantics rather than only on target-project code.
 
 If you cannot identify attacker-controlled inputs, reachable calls, and a broken invariant, do not report the issue. Keep it as a rejected candidate or an assumption note at most. Use `references/checks/check-router.md` to pressure-test whether you missed a stronger exploit path.
 
@@ -93,7 +93,6 @@ Use `references/reporting/severity.md` for default risk and confidence assignmen
 ## Execution Constraints
 
 - Complete the audit in one autonomous pass and stop only after the report has been written or a truly blocking missing input has been identified.
-- Default to source inspection and reasoning only.
-- Do not run tests, builds, or helper commands such as `sui move test`.
-- Do not interrupt the flow to ask for shell-command approval when the audit can proceed statically.
-- If a command was not explicitly requested by the user, prefer documenting any resulting validation gap over asking to execute it.
+- Start with source inspection, but always run `MOVE_HOME=<workspace>/.move sui move build` once early in the audit to materialize `build/<package-name>/sources/dependencies` for pinned dependency review without writing to the user's default `~/.move`.
+- Do not run tests or helper commands such as `sui move test` unless the user explicitly requests additional dynamic verification.
+- Do not interrupt the flow to ask for shell-command approval for the required build step. Use a workspace-local `MOVE_HOME`; if the build still fails, document the validation gap and continue with the best available local, vendored, or upstream sources.
