@@ -52,10 +52,24 @@ Before promoting a candidate issue into a finding, confirm:
 - the invariant break survives transaction abort semantics
 - the issue is not merely an intended admin power or documented trust assumption
 - the impact is concrete: theft, unauthorized control, stuck funds, permanent breakage, or meaningful denial of service
-- if the conclusion depends on Sui framework or Move stdlib behavior, the relevant dependency module semantics have been cross-checked from the best available local, vendored, or upstream source
+- when feasible, a minimal PoC reproduces the success path, expected abort, or invariant break that the finding depends on
 
 Use `references/validation/candidate-validation.md` as the validation checklist and status model for each candidate.
-Use `references/validation/sui-framework.md` whenever validation depends on framework-defined semantics rather than only on target-project code.
+
+Prefer adding or adapting a minimal PoC during this step instead of relying only on static reasoning. Default to narrow TypeScript PoCs first, then fall back only when the path cannot be modeled faithfully through a script-driven call flow. The goal is to produce a clear PoC artifact; executing it is optional and not required by this skill. Good validation PoCs usually do one of these:
+
+- show the attacker-controlled path succeeds and produces the claimed unauthorized state change
+- show an expected protection is missing because the call does not abort
+- show the vulnerable path aborts with the claimed code only after the proposed fix
+- lock in a boundary condition so the report is backed by a reproducible regression test
+
+Use the lightest PoC that can settle the question:
+
+- TypeScript PoC for local exploitability, missing checks, PTB composition, shared-object interaction, object IDs, expected failures, or regression coverage
+- helper-module PoC only when a script-driven PoC cannot express the relevant state transition cleanly
+- source-only validation when no realistic PoC can exercise the target condition faithfully
+
+If no PoC is feasible or a PoC would provide false confidence, document why and continue with source-backed validation.
 
 If you cannot identify attacker-controlled inputs, reachable calls, and a broken invariant, do not report the issue. Keep it as a rejected candidate or an assumption note at most. Use `references/checks/check-router.md` to pressure-test whether you missed a stronger exploit path.
 
@@ -87,12 +101,15 @@ After the false-positive pass, produce the final audit report using only validat
 Unless the user specifies another path or format, create `reports/` under the skill root if it does not already exist and write the final report there as `{project-name}-exvul-sui-move-audit-report.md`.
 Use the repository root's base directory name as `{project-name}`.
 
+If you create a temporary draft file such as `.codex-report-draft.md` in the audit target while composing the final report, delete it before finishing. Do not leave transient draft artifacts behind once the final report has been written successfully.
+
 Use `references/reporting/report-formatting.md` for the required report sections, finding structure, output rules, and separation between validated findings versus assumptions, unknowns, or rejected candidates.
 Use `references/reporting/severity.md` for default risk and confidence assignment.
 
 ## Execution Constraints
 
 - Complete the audit in one autonomous pass and stop only after the report has been written or a truly blocking missing input has been identified.
-- Start with source inspection, but always run `MOVE_HOME=<workspace>/.move sui move build` once early in the audit to materialize `build/<package-name>/sources/dependencies` for pinned dependency review without writing to the user's default `~/.move`.
-- Do not run tests or helper commands such as `sui move test` unless the user explicitly requests additional dynamic verification.
-- Do not interrupt the flow to ask for shell-command approval for the required build step. Use a workspace-local `MOVE_HOME`; if the build still fails, document the validation gap and continue with the best available local, vendored, or upstream sources.
+- Start with source inspection.
+- Prefer a focused TypeScript PoC during step 6 when a script can materially strengthen or falsify a candidate finding.
+- If a TypeScript PoC cannot model the relevant condition faithfully, use the smallest alternative PoC that can, and document the tradeoff.
+- If no realistic PoC can be run, document the validation gap and continue with source-backed reasoning.

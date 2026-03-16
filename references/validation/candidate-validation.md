@@ -21,10 +21,10 @@ Answer these for each candidate before reporting it:
 5. Does the attack still work after applying abort semantics and PTB composition rules?
 6. What invariant, authorization boundary, or custody property is broken if the transaction succeeds?
 7. Is the outcome concrete enough to matter: theft, unauthorized privilege, stuck funds, irreversible state breakage, or meaningful denial of service?
-8. Does the conclusion rely on Sui framework or Move stdlib semantics, and if so, has the relevant dependency module been cross-checked from the best available local, vendored, or upstream source?
+8. Can a minimal PoC reproduce the exploit path, the missing abort, or the broken invariant; if not, why not?
 
 If any of questions 1 through 6 cannot be answered from the target code and realistic assumptions, do not mark the issue `Validated`.
-If question 8 applies and the framework behavior has not been verified, prefer `Unknown` or keep the candidate unreported until the semantics are confirmed.
+If question 8 is feasible but skipped, explain the reason in the validation note.
 
 ## Validation Note Template
 
@@ -39,16 +39,20 @@ Keep a short internal note for each candidate using this structure:
 - Blocking Conditions: ...
 - Broken Invariant: ...
 - Evidence: ...
+- PoC Type: TypeScript | Helper Module | Source Only | None
+- PoC Path/Test Name: ...
+- PoC Evidence: ...
 ```
 
-When framework semantics matter, include both:
+When a PoC is feasible, include:
 
-- target-project evidence
-- the specific framework module or dependency source that supports the conclusion
+- whether it is a TypeScript PoC, helper module, or source-only conclusion
+- the test name or script path
+- whether it demonstrates exploit success, missing protection, expected abort, or post-fix regression coverage
 
 ## Escalation Rules
 
 - If the path is reachable only through admin intent that matches the documented trust model, reject it.
 - If the path depends on an upgrade, migration, or governance action that is not code-provable, move it to `Unknown` unless the code itself exposes the break.
 - If the issue is only a pattern match from `references/checks/check-router.md` or a routed check file, reject it until code-specific evidence exists.
-- If the issue depends on assumed framework behavior that has not been verified against the relevant Sui framework source, do not mark it `Validated`.
+- If a minimal PoC can realistically settle the candidate and none is attempted, lower confidence and keep the reasoning explicit.

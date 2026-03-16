@@ -1,7 +1,7 @@
 interface:
   display_name: "Sui Move Auditor"
   short_description: "Audit Sui Move contracts with validated findings"
-  default_prompt: "Use $sui-move-auditor to audit this Sui Move package autonomously, continue until the final report has been written to audit-report.md, validate each candidate against reachability, capability obtainability, ownership rules, and abort semantics, keep rejected candidates out of findings, run MOVE_HOME=<workspace>/.move sui move build once near the start so you can inspect build/<package-name>/sources/dependencies for pinned framework sources without using ~/.move, do not ask the user to approve that required build step, do not run tests or extra dynamic verification such as sui move test unless the user explicitly requests it, and if the build cannot establish the exact dependency revision, document the limitation and fall back to local, vendored, or upstream sources."
+  default_prompt: "Use $sui-move-auditor to audit this Sui Move package autonomously, print the startup banner from references/banner.txt once near the beginning, continue until the final report has been written to audit-report.md, validate each candidate against reachability, capability obtainability, ownership rules, abort semantics, and minimal PoC evidence when feasible, prefer focused TypeScript PoCs first, produce PoC artifacts when useful but do not treat execution as required, keep rejected candidates out of findings, and delete temporary draft artifacts such as .codex-report-draft.md before finishing."
 
 policy:
   allow_implicit_invocation: false

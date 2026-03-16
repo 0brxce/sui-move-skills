@@ -11,7 +11,7 @@ Use this reference before deep review and during false-positive validation.
 - Dynamic fields, tables, bags, and derived storage extend state beyond the parent object.
 - `TxContext::sender()` proves the immediate sender, not broader intent. Do not treat it as a substitute for a capability unless the design explicitly trusts that model.
 - Package upgrades and migrations are part of the attack surface.
-- When target code relies on `sui::` or `std::` modules, treat the resolved dependency sources for the target package as the semantic truth source rather than relying only on local wrappers, naming, or comments.
+- When target code relies on `sui::` or `std::` modules, reason conservatively from the observable target-project behavior instead of overcommitting to unverified dependency assumptions.
 
 ## Anti-False-Positive Rules
 
@@ -19,4 +19,4 @@ Use this reference before deep review and during false-positive validation.
 - Do not infer exploitability from names like `AdminCap`, `Vault`, `Treasury`, `withdraw`, or `claim` alone; verify the actual type abilities, call reachability, and object flow.
 - Treat a path as safe until you can prove attacker reachability, obtainable authority or object inputs, and a concrete broken invariant after execution.
 - If a concern depends on an unstated off-chain process, governance behavior, or deployment assumption, keep it in assumptions or open questions unless the code itself makes the risk reachable.
-- If a concern turns on framework behavior such as transfer semantics, dynamic-field ownership, coin supply handling, or abort effects, verify that behavior against the corresponding resolved framework dependency module before validating or rejecting the candidate.
+- If a concern turns on framework behavior such as transfer semantics, dynamic-field ownership, coin supply handling, or abort effects, keep the conclusion conservative unless the target code itself makes the behavior clear.

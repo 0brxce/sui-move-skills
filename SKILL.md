@@ -9,11 +9,11 @@ Use this skill for Sui-specific smart contract security reviews. This file defin
 
 Read supporting references only when they are needed:
 
+- `references/banner.txt` at the start of the audit to print the skill banner once
 - `references/workflow.md` for the full step-by-step audit flow
 - `references/pre-audit/scoping.md` during initial package inventory and trust-boundary mapping
 - `references/pre-audit/review-lens.md` before deep review and during false-positive validation
 - `references/validation/candidate-validation.md` when turning a candidate into a validated finding or rejecting it
-- `references/validation/sui-framework.md` when validation depends on Sui framework or Move stdlib semantics
 - `references/validation/false-positive-filters.md` during the false-positive pass
 - `references/reporting/report-formatting.md` before assembling the final report
 - `references/reporting/severity.md` when assigning risk and confidence
@@ -49,21 +49,25 @@ Use `references/workflow.md` for the full step-by-step procedure.
 3. Route the package to the relevant checklist topics and skip the rest explicitly.
 4. Trace critical state transitions instead of reasoning from isolated lines.
 5. Test attacker-controlled reachability and function composition paths.
-6. Validate each candidate against concrete reachability, obtainability, and broken invariants.
+6. Validate each candidate against concrete reachability, obtainability, broken invariants, and minimal PoC evidence when feasible.
 7. Run a false-positive pass that tries to disprove every remaining candidate.
 8. Assemble the final report using only validated findings.
 
 ## Working Style
 
 - Read code before theorizing.
+- Print the banner from `references/banner.txt` once near the start of the audit before the substantive review begins.
 - Prefer package-wide reasoning over isolated lint-style comments.
 - Use `references/checks/check-router.md` for depth and coverage, not as a substitute for code-backed reasoning.
 - Execute the full audit flow autonomously until the final report file has been written unless a critical input is missing or the target is ambiguous.
-- Keep this skill source-first, but always run `MOVE_HOME=<workspace>/.move sui move build` once near the start of the audit so the package materializes pinned dependency sources under `build/<package-name>/sources/dependencies` without relying on the user's home directory.
-- Do not run tests or package commands such as `sui move test` unless the user explicitly requests additional dynamic verification.
-- Do not ask the user for permission to execute the default audit commands. Execute the required build step autonomously with a workspace-local `MOVE_HOME`, then continue with source-backed validation.
-- If the required build step fails or cannot resolve the exact dependency revision, record the limitation and continue with the best available source-backed validation rather than pausing for command approval.
-- When exploitability or safety depends on Sui framework behavior, cross-check the relevant module semantics against the canonical sources described in `references/validation/sui-framework.md`.
+- Keep this skill source-first.
+- During candidate validation, prefer minimal PoCs that make exploitability or broken invariants concrete instead of relying only on static reasoning.
+- Default to focused TypeScript PoCs first, and produce a concise `ts` script whenever it can express exploitability, invariant breaks, transaction composition, or expected failure behavior clearly.
+- Start from `assets/poc-template.ts` when it is a good fit, and replace every placeholder with target-specific values instead of copying live addresses or secrets into the skill itself.
+- The agent only needs to deliver the PoC artifact and explain how it supports the conclusion. Executing the PoC is optional and not required by this skill.
+- If a TypeScript PoC cannot model the path faithfully, use the smallest realistic alternative PoC that still exercises the real call composition.
+- If dynamic verification is not feasible because the package lacks a runnable test setup, the path depends on non-local environment state, or the proof would be misleading, state that limitation explicitly and fall back to source-backed validation.
+- If a temporary draft such as `.codex-report-draft.md` is created in the audit target while assembling the final report, delete it before finishing so only the intended final output remains.
 - Call out uncertainty explicitly when assumptions about off-chain components, package deployment, or governance are missing.
 
 ## Invocation

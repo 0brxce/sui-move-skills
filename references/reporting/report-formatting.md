@@ -25,7 +25,7 @@ Start the report with a compact table:
 | Field | Value |
 |---|---|
 | Review Time | 2026-03-13 |
-| Project | Kai-Finance |
+| Project | <project-name> |
 | Scope | `pkg-a`, `pkg-b`, `pkg-c` |
 ```
 
@@ -91,6 +91,7 @@ Use this structure for each validated issue:
 | Risk | High |
 | Confidence | High |
 | Affected | `vault::reconfigure` |
+| Validation Evidence | `TypeScript PoC` |
 | Status | ✅ Validated |
 
 **Description**  
@@ -108,6 +109,9 @@ Short description of the concrete exploit result.
 2. Second execution step.
 3. Resulting unauthorized effect or value extraction.
 
+**PoC Validation**  
+Short note naming the test or script that reproduced the issue, or `source-only validation` if no realistic PoC was possible.
+
 **Recommendation**  
 Specific engineering fix.
 ```
@@ -117,12 +121,15 @@ Rules:
 - Keep each validated issue concise.
 - Do not include long attack narratives unless they are necessary to justify exploitability.
 - `Affected` should point to the main module or function.
+- `Validation Evidence` should be one of `TypeScript PoC`, `helper-module PoC`, or `source-only validation`.
 - `Status` must be `✅ Validated`.
 - Add a short code excerpt immediately after `Description` when it materially helps the reader see the bug.
 - Keep code excerpts brief and focused on the vulnerable check, state update, or transfer logic.
 - Include `Exploit Path` for every validated issue.
+- Include `PoC Validation` for every validated issue.
 - Format `Exploit Path` as a short numbered list, usually 3 to 5 steps.
 - Keep each step concrete and execution-oriented.
+- Keep `PoC Validation` to one short line naming the PoC artifact or explaining why the finding is source-only.
 
 If there are no validated findings, include this exact section body:
 
@@ -160,3 +167,4 @@ Rules:
 - Create `reports/` if it does not already exist.
 - Default report filename is `{project-name}-exvul-sui-move-audit-report.md`.
 - Derive `{project-name}` from the repository root's base directory name.
+- Do not leave temporary report artifacts such as `.codex-report-draft.md` in the audited repository after the final report is written.
