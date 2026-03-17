@@ -37,7 +37,7 @@ The workflow is built to reduce weak findings:
 
 - source-first review before theorizing
 - explicit privilege and asset mapping
-- candidate validation with minimal PoC evidence when feasible
+- candidate validation with concrete code-backed evidence
 - false-positive pressure testing before final reporting
 - report output limited to validated findings
 
@@ -46,15 +46,12 @@ The workflow is built to reduce weak findings:
 - Autonomous audit flow from initial scoping through final report writing
 - Built-in startup banner sourced from `references/banner.txt`
 - Sui-specific review guidance for object ownership, capabilities, custody, and PTB composition
-- PoC-first validation in stage 6, with focused TypeScript PoCs preferred when they can materially strengthen conclusions
-- Bundled TypeScript PoC starter template in `assets/poc-template.ts`
 - Adversarial false-positive filtering before a candidate becomes a finding
-- Structured report format with severity, confidence, exploit path, and PoC validation evidence
+- Structured report format with severity, confidence, affected surface, and exploit path
 
 ## Prerequisites
 
 - Codex with skill loading enabled
-- A local Node.js / TypeScript environment if validation needs a TypeScript PoC
 
 ## Installation
 
@@ -85,7 +82,7 @@ Use $sui-move-auditor to audit this Sui Move package and write the final report.
 Default output location:
 
 ```text
-reports/<project-name>-exvul-sui-move-audit-report.md
+<codex-workspace>/<project-name>-exvul-sui-move-audit-report.md
 ```
 
 The generated report includes:
@@ -93,7 +90,6 @@ The generated report includes:
 - validated findings only
 - severity and confidence assignments
 - exploit paths
-- PoC validation notes
 - rejected or unvalidated issue tracking
 - checklist coverage
 
@@ -106,17 +102,9 @@ The skill runs an eight-step workflow:
 3. Route the package through the relevant checklist topics.
 4. Trace critical state transitions.
 5. Review attacker-controlled reachability and function composition.
-6. Validate candidates with concrete reachability, broken invariants, and minimal PoC evidence when feasible.
+6. Validate candidates with concrete reachability, broken invariants, and direct code-backed evidence.
 7. Run a false-positive pass to disprove weak candidates.
 8. Write the final report using only validated findings.
-
-Validation defaults to the lightest strong evidence available:
-
-- TypeScript PoC first
-- helper-module PoC when a script-driven harness cannot express the relevant transition cleanly
-- source-only validation only when a realistic PoC is not feasible
-
-The skill only requires the agent to produce the PoC artifact. Executing the PoC is optional and not required.
 
 ## Project Structure
 
@@ -125,16 +113,12 @@ The skill only requires the agent to produce the PoC artifact. Executing the PoC
 ├── SKILL.md
 ├── agents/
 │   └── openai.yaml
-├── assets/
-│   └── poc-template.ts
 ├── references/
 │   ├── workflow.md
 │   ├── checks/
 │   ├── pre-audit/
 │   ├── reporting/
 │   └── validation/
-└── reports/
-    └── README.md
 ```
 
 ## Included References
@@ -152,14 +136,13 @@ The final report is compact and audit-oriented. Each validated finding includes:
 - risk
 - confidence
 - affected function or module
-- validation evidence type
 - exploit path
-- PoC validation note
 - recommendation
 
 ## Contact
 
 If you are looking to explore strategies for securing your project, reach out for a chat on Telegram [@realnolan](https://t.me/realnolan).
+
 [![X (formerly Twitter)](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/exvulsec)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/realnolan)
 [![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=safari&logoColor=white)](https://exvul.com)

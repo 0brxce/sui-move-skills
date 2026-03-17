@@ -21,10 +21,10 @@ Answer these for each candidate before reporting it:
 5. Does the attack still work after applying abort semantics and PTB composition rules?
 6. What invariant, authorization boundary, or custody property is broken if the transaction succeeds?
 7. Is the outcome concrete enough to matter: theft, unauthorized privilege, stuck funds, irreversible state breakage, or meaningful denial of service?
-8. Can a minimal PoC reproduce the exploit path, the missing abort, or the broken invariant; if not, why not?
+8. What direct code-backed evidence shows the exploit path, missing protection, or broken invariant?
 
 If any of questions 1 through 6 cannot be answered from the target code and realistic assumptions, do not mark the issue `Validated`.
-If question 8 is feasible but skipped, explain the reason in the validation note.
+If question 8 cannot be answered clearly, lower confidence or keep the candidate out of validated findings.
 
 ## Validation Note Template
 
@@ -39,20 +39,16 @@ Keep a short internal note for each candidate using this structure:
 - Blocking Conditions: ...
 - Broken Invariant: ...
 - Evidence: ...
-- PoC Type: TypeScript | Helper Module | Source Only | None
-- PoC Path/Test Name: ...
-- PoC Evidence: ...
 ```
 
-When a PoC is feasible, include:
+When the evidence depends on a specific trace, include:
 
-- whether it is a TypeScript PoC, helper module, or source-only conclusion
-- the test name or script path
-- whether it demonstrates exploit success, missing protection, expected abort, or post-fix regression coverage
+- the relevant function path, object flow, or capability chain
+- the abort behavior or state transition that makes the issue real or disproves it
+- any assumption that cannot be resolved from code alone
 
 ## Escalation Rules
 
 - If the path is reachable only through admin intent that matches the documented trust model, reject it.
 - If the path depends on an upgrade, migration, or governance action that is not code-provable, move it to `Unknown` unless the code itself exposes the break.
 - If the issue is only a pattern match from `references/checks/check-router.md` or a routed check file, reject it until code-specific evidence exists.
-- If a minimal PoC can realistically settle the candidate and none is attempted, lower confidence and keep the reasoning explicit.

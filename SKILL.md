@@ -49,7 +49,7 @@ Use `references/workflow.md` for the full step-by-step procedure.
 3. Route the package to the relevant checklist topics and skip the rest explicitly.
 4. Trace critical state transitions instead of reasoning from isolated lines.
 5. Test attacker-controlled reachability and function composition paths.
-6. Validate each candidate against concrete reachability, obtainability, broken invariants, and minimal PoC evidence when feasible.
+6. Validate each candidate against concrete reachability, obtainability, broken invariants, and direct code-backed evidence.
 7. Run a false-positive pass that tries to disprove every remaining candidate.
 8. Assemble the final report using only validated findings.
 
@@ -61,11 +61,7 @@ Use `references/workflow.md` for the full step-by-step procedure.
 - Use `references/checks/check-router.md` for depth and coverage, not as a substitute for code-backed reasoning.
 - Execute the full audit flow autonomously until the final report file has been written unless a critical input is missing or the target is ambiguous.
 - Keep this skill source-first.
-- During candidate validation, prefer minimal PoCs that make exploitability or broken invariants concrete instead of relying only on static reasoning.
-- Default to focused TypeScript PoCs first, and produce a concise `ts` script whenever it can express exploitability, invariant breaks, transaction composition, or expected failure behavior clearly.
-- Start from `assets/poc-template.ts` when it is a good fit, and replace every placeholder with target-specific values instead of copying live addresses or secrets into the skill itself.
-- The agent only needs to deliver the PoC artifact and explain how it supports the conclusion. Executing the PoC is optional and not required by this skill.
-- If a TypeScript PoC cannot model the path faithfully, use the smallest realistic alternative PoC that still exercises the real call composition.
+- During candidate validation, prefer direct evidence from reachable call paths, object flow, capability flow, and broken invariants instead of speculative reasoning.
 - If dynamic verification is not feasible because the package lacks a runnable test setup, the path depends on non-local environment state, or the proof would be misleading, state that limitation explicitly and fall back to source-backed validation.
 - If a temporary draft such as `.codex-report-draft.md` is created in the audit target while assembling the final report, delete it before finishing so only the intended final output remains.
 - Call out uncertainty explicitly when assumptions about off-chain components, package deployment, or governance are missing.
@@ -74,4 +70,4 @@ Use `references/workflow.md` for the full step-by-step procedure.
 
 Explicit skill invocation inside Codex uses `$sui-move-auditor`.
 
-The wrapper should start Codex in the target project and use this skill to generate `reports/{project-name}-exvul-sui-move-audit-report.md` under the installed skill root by default.
+The wrapper should start Codex in the target project and use this skill to generate `{project-name}-exvul-sui-move-audit-report.md` in the current Codex workspace root by default.

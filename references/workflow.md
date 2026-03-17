@@ -52,24 +52,9 @@ Before promoting a candidate issue into a finding, confirm:
 - the invariant break survives transaction abort semantics
 - the issue is not merely an intended admin power or documented trust assumption
 - the impact is concrete: theft, unauthorized control, stuck funds, permanent breakage, or meaningful denial of service
-- when feasible, a minimal PoC reproduces the success path, expected abort, or invariant break that the finding depends on
+- the finding is supported by direct code-backed evidence such as reachable call flow, concrete inputs, and invariant-breaking state transitions
 
 Use `references/validation/candidate-validation.md` as the validation checklist and status model for each candidate.
-
-Prefer adding or adapting a minimal PoC during this step instead of relying only on static reasoning. Default to narrow TypeScript PoCs first, then fall back only when the path cannot be modeled faithfully through a script-driven call flow. The goal is to produce a clear PoC artifact; executing it is optional and not required by this skill. Good validation PoCs usually do one of these:
-
-- show the attacker-controlled path succeeds and produces the claimed unauthorized state change
-- show an expected protection is missing because the call does not abort
-- show the vulnerable path aborts with the claimed code only after the proposed fix
-- lock in a boundary condition so the report is backed by a reproducible regression test
-
-Use the lightest PoC that can settle the question:
-
-- TypeScript PoC for local exploitability, missing checks, PTB composition, shared-object interaction, object IDs, expected failures, or regression coverage
-- helper-module PoC only when a script-driven PoC cannot express the relevant state transition cleanly
-- source-only validation when no realistic PoC can exercise the target condition faithfully
-
-If no PoC is feasible or a PoC would provide false confidence, document why and continue with source-backed validation.
 
 If you cannot identify attacker-controlled inputs, reachable calls, and a broken invariant, do not report the issue. Keep it as a rejected candidate or an assumption note at most. Use `references/checks/check-router.md` to pressure-test whether you missed a stronger exploit path.
 
@@ -98,7 +83,7 @@ Only keep findings that survive this pass. Drop speculative, weak, or assumption
 
 After the false-positive pass, produce the final audit report using only validated findings.
 
-Unless the user specifies another path or format, create `reports/` under the skill root if it does not already exist and write the final report there as `{project-name}-exvul-sui-move-audit-report.md`.
+Unless the user specifies another path or format, write the final report to the current Codex workspace root as `{project-name}-exvul-sui-move-audit-report.md`.
 Use the repository root's base directory name as `{project-name}`.
 
 If you create a temporary draft file such as `.codex-report-draft.md` in the audit target while composing the final report, delete it before finishing. Do not leave transient draft artifacts behind once the final report has been written successfully.
@@ -110,6 +95,4 @@ Use `references/reporting/severity.md` for default risk and confidence assignmen
 
 - Complete the audit in one autonomous pass and stop only after the report has been written or a truly blocking missing input has been identified.
 - Start with source inspection.
-- Prefer a focused TypeScript PoC during step 6 when a script can materially strengthen or falsify a candidate finding.
-- If a TypeScript PoC cannot model the relevant condition faithfully, use the smallest alternative PoC that can, and document the tradeoff.
-- If no realistic PoC can be run, document the validation gap and continue with source-backed reasoning.
+- If dynamic verification is unavailable or misleading, document the validation gap and continue with explicit source-backed reasoning.

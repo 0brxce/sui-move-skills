@@ -4,7 +4,7 @@ Use this reference when assembling the final audit report.
 
 ## Report Structure
 
-The final report should contain only these four sections, in this order:
+The final report should contain only these sections, in this order:
 
 1. `# Audit Report`
 2. `## Information`
@@ -91,7 +91,6 @@ Use this structure for each validated issue:
 | Risk | High |
 | Confidence | High |
 | Affected | `vault::reconfigure` |
-| Validation Evidence | `TypeScript PoC` |
 | Status | ✅ Validated |
 
 **Description**  
@@ -109,9 +108,6 @@ Short description of the concrete exploit result.
 2. Second execution step.
 3. Resulting unauthorized effect or value extraction.
 
-**PoC Validation**  
-Short note naming the test or script that reproduced the issue, or `source-only validation` if no realistic PoC was possible.
-
 **Recommendation**  
 Specific engineering fix.
 ```
@@ -121,15 +117,12 @@ Rules:
 - Keep each validated issue concise.
 - Do not include long attack narratives unless they are necessary to justify exploitability.
 - `Affected` should point to the main module or function.
-- `Validation Evidence` should be one of `TypeScript PoC`, `helper-module PoC`, or `source-only validation`.
 - `Status` must be `✅ Validated`.
 - Add a short code excerpt immediately after `Description` when it materially helps the reader see the bug.
 - Keep code excerpts brief and focused on the vulnerable check, state update, or transfer logic.
 - Include `Exploit Path` for every validated issue.
-- Include `PoC Validation` for every validated issue.
 - Format `Exploit Path` as a short numbered list, usually 3 to 5 steps.
 - Keep each step concrete and execution-oriented.
-- Keep `PoC Validation` to one short line naming the PoC artifact or explaining why the finding is source-only.
 
 If there are no validated findings, include this exact section body:
 
@@ -163,8 +156,7 @@ Rules:
 - Keep the report compact and delivery-oriented.
 - Only include validated issues in the detailed findings section.
 - If no validated findings remain, still include `Information`, `Findings Summary`, `Rejected or Unvalidated Issues`, and `Checklist Coverage`.
-- Default output directory is `reports/` under the installed skill root unless the user asks for another path.
-- Create `reports/` if it does not already exist.
+- Default output directory is the current Codex workspace root unless the user asks for another path.
 - Default report filename is `{project-name}-exvul-sui-move-audit-report.md`.
 - Derive `{project-name}` from the repository root's base directory name.
 - Do not leave temporary report artifacts such as `.codex-report-draft.md` in the audited repository after the final report is written.
