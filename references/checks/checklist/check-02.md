@@ -4,28 +4,24 @@
 
 ### 2.1 Unauthorized Shared Object Mutation
 
-- **Severity:** high – critical
 - **D:** A shared object (`transfer::share_object`) is mutated via `&mut` in a function with no capability guard
 - **FP:** The function enforces equivalent authorization through a capability, ownership proof, or another non-forgeable control object
 - **Search:** `transfer::share_object`, shared object struct types, functions taking `&mut` of those types, then verify authorization in the callee rather than by parameter adjacency alone
 
 ### 2.2 Shared Object Contention DoS
 
-- **Severity:** medium
 - **D:** High-frequency user flows such as swap, deposit, or claim all write to one shared object and spammable transactions can block others
 - **FP:** State is partitioned per user, or write contention is bounded and well-documented
 - **Search:** `transfer::share_object` and check whether the same object is written in hot paths
 
 ### 2.3 Lifecycle Invariant Break (create / update / delete / transfer)
 
-- **Severity:** high
 - **D:** An object can be created, transferred, or deleted without updating all invariant fields such as counts, balances, or indices
 - **FP:** Every lifecycle transition touches the same invariant set consistently
 - **Search:** Functions that call `object::delete` or `transfer::transfer`; verify all bookkeeping is done before the call
 
 ### 2.4 Wrap/Unwrap Validation Bypass
 
-- **Severity:** high
 - **D:** Wrapping a resource into a container or shared object, or later unwrapping or withdrawing it, skips the ownership or capability checks enforced in the primary flow
 - **FP:** Wrap or unwrap helpers enforce identical checks as the main entry functions
 - **Search:** wrapper or container helper functions, `dynamic_field::add`, `dynamic_field::remove`, `dynamic_object_field::add`, `dynamic_object_field::remove`, and custom deposit or withdraw helpers for resource-holding objects
@@ -49,3 +45,9 @@ module demo::vault_wrap {
     }
 }
 ```
+
+### 2.5 Unbounded Shared-State Growth
+
+- **D:** User-reachable flows can append receipts, orders, claims, or metadata into a shared object or its child storage without per-user bounds, pruning, or economic friction
+- **FP:** Growth is bounded by deposits, storage rebates, per-user quotas, or explicit cleanup paths that keep operational state under control
+- **Search:** `dynamic_field::add`, `table::add`, `bag::add`, shared object mutation in user flows, and whether the write path has bounds or cleanup

@@ -31,7 +31,7 @@ Autonomous Sui Move security audit skill for Codex, built for validated findings
 
 ## What Is This?
 
-`exvul-sui-move-skill` is a Codex skill for autonomous end-to-end security reviews of Sui Move packages. It is designed for full audits, not casual code explanation. The skill scopes the package, routes review paths through Sui-specific checklists, validates candidate issues against reachability and broken invariants, and writes a structured final report.
+`exvul-sui-move-skill` is a Codex skill for autonomous end-to-end security reviews of Sui Move packages. It is designed for full audits, not casual code explanation. The skill scopes the package, routes review paths through Sui-specific checklists, validates candidate issues against reachability and broken invariants, retains code-backed medium, low, and informational issues, and writes a structured final report.
 
 The workflow is built to reduce weak findings:
 
@@ -39,7 +39,7 @@ The workflow is built to reduce weak findings:
 - explicit privilege and asset mapping
 - candidate validation with concrete code-backed evidence
 - false-positive pressure testing before final reporting
-- report output limited to validated findings
+- report output limited to validated findings, including supported medium, low, and informational issues
 
 ## Key Features
 
@@ -47,7 +47,9 @@ The workflow is built to reduce weak findings:
 - Built-in startup banner sourced from `references/banner.txt`
 - Sui-specific review guidance for object ownership, capabilities, custody, and PTB composition
 - Adversarial false-positive filtering before a candidate becomes a finding
-- Structured report format with severity, confidence, affected surface, and exploit path
+- Structured report format with severity, affected surface, and exploit path
+- Support for validated medium, low, and informational security findings when the downside is concrete
+- Expanded low-severity checklist coverage for defense-in-depth, shared-state growth, stale registries, trust assumptions, and diagnostics gaps
 
 ## Prerequisites
 
@@ -88,7 +90,7 @@ Default output location:
 The generated report includes:
 
 - validated findings only
-- severity and confidence assignments
+- severity assignments
 - exploit paths
 - rejected or unvalidated issue tracking
 - checklist coverage
@@ -134,7 +136,6 @@ The skill runs an eight-step workflow:
 The final report is compact and audit-oriented. Each validated finding includes:
 
 - risk
-- confidence
 - affected function or module
 - exploit path
 - recommendation

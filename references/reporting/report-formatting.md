@@ -89,7 +89,6 @@ Use this structure for each validated issue:
 | Field | Value |
 |---|---|
 | Risk | High |
-| Confidence | High |
 | Affected | `vault::reconfigure` |
 | Status | ✅ Validated |
 
@@ -156,6 +155,7 @@ Rules:
 - Keep the report compact and delivery-oriented.
 - Only include validated issues in the detailed findings section.
 - If no validated findings remain, still include `Information`, `Findings Summary`, `Rejected or Unvalidated Issues`, and `Checklist Coverage`.
+- Include validated `Medium`, `Low`, and `Informational` findings by default when they are code-backed. Do not omit them solely because they are not directly exploitable.
 - Default output directory is the current Codex workspace root unless the user asks for another path.
 - Default report filename is `{project-name}-exvul-sui-move-audit-report.md`.
 - Derive `{project-name}` from the repository root's base directory name.

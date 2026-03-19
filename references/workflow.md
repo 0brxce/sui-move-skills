@@ -56,7 +56,7 @@ Before promoting a candidate issue into a finding, confirm:
 
 Use `references/validation/candidate-validation.md` as the validation checklist and status model for each candidate.
 
-If you cannot identify attacker-controlled inputs, reachable calls, and a broken invariant, do not report the issue. Keep it as a rejected candidate or an assumption note at most. Use `references/checks/check-router.md` to pressure-test whether you missed a stronger exploit path.
+If a candidate claims theft, unauthorized control, or a meaningful invariant break, you must identify attacker-controlled inputs, reachable calls, and the broken invariant before reporting it. For lower-severity findings such as defense-in-depth, observability, or maintainability weaknesses, require a concrete reachable code path and a clear security-relevant downside even if there is no full exploit path. Use `references/checks/check-router.md` to pressure-test whether you missed a stronger exploit path.
 
 ## 7. Run a false-positive pass
 
@@ -77,11 +77,11 @@ Use `references/checks/check-router.md` and `references/validation/false-positiv
 Do not treat `references/checks/check-router.md` as evidence that an issue is safe or unsafe by itself. Resolve every challenge by re-reading the target code, call graph, object flow, capability flow, and applicable Sui semantics.
 Re-check any "looks similar to the example" intuition against the actual privilege graph, object ownership rules, and PTB/abort behavior in the target code.
 
-Only keep findings that survive this pass. Drop speculative, weak, or assumption-heavy candidates. If a concern is useful but unproven, keep it outside the validated findings section as an assumption, unknown, or rejected candidate.
+Only keep findings that survive this pass. Drop speculative or assumption-heavy candidates, but do not drop a well-supported medium, low, or informational issue solely because its impact is scoped. If a concern is useful but unproven, keep it outside the validated findings section as an assumption, unknown, or rejected candidate.
 
 ## 8. Assemble the audit report
 
-After the false-positive pass, produce the final audit report using only validated findings.
+After the false-positive pass, produce the final audit report using validated findings across all supported severities, including code-backed medium, low, and informational issues.
 
 Unless the user specifies another path or format, write the final report to the current Codex workspace root as `{project-name}-exvul-sui-move-audit-report.md`.
 Use the repository root's base directory name as `{project-name}`.
@@ -89,7 +89,7 @@ Use the repository root's base directory name as `{project-name}`.
 If you create a temporary draft file such as `.codex-report-draft.md` in the audit target while composing the final report, delete it before finishing. Do not leave transient draft artifacts behind once the final report has been written successfully.
 
 Use `references/reporting/report-formatting.md` for the required report sections, finding structure, output rules, and separation between validated findings versus assumptions, unknowns, or rejected candidates.
-Use `references/reporting/severity.md` for default risk and confidence assignment.
+Use `references/reporting/severity.md` for default risk assignment.
 
 ## Execution Constraints
 

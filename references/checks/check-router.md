@@ -12,7 +12,8 @@ Do not load every check by default.
 Global rules:
 
 - Every checklist hit starts as a candidate only.
-- A confirmed finding requires attacker reachability, obtainable required inputs, a concrete broken invariant or unauthorized effect, and no blocking Sui rule from ownership, visibility, typing, or abort semantics.
+- A confirmed high-impact finding requires attacker reachability, obtainable required inputs, a concrete broken invariant or unauthorized effect, and no blocking Sui rule from ownership, visibility, typing, or abort semantics.
+- A candidate may validate either as an exploitability finding or as a lower-severity security note if the code shows a concrete security-relevant downside.
 - Every `FP` condition in a check file is only a verification prompt, not proof of safety by itself.
 
 ## Check Routes
@@ -48,6 +49,6 @@ Use `references/validation/false-positive-filters.md` only during the false-posi
 - Skip `check-05` if there are no `friend` boundaries, upgrade or migration flows, or meaningful external trust assumptions.
 - Skip `check-06` if correctness does not depend on time, oracle, epoch, or market-derived inputs.
 - Skip `check-07` if there is no multi-step workflow, sequencing-sensitive state machine, or emergency or pause control surface.
-- Skip `check-08` if the review is exploitability-only and events or abort codes do not affect any monitored or security-relevant workflow.
+- Skip `check-08` only if the user explicitly requests an exploitability-only review and events or abort codes clearly do not affect any monitored or security-relevant workflow.
 
 Do not skip a topic just because the package is small. Record routed and skipped topics in working notes.

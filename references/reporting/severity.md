@@ -1,6 +1,6 @@
-# Severity and Confidence
+# Severity
 
-Use this reference when assigning `Risk` and `Confidence` to validated findings.
+Use this reference when assigning `Risk` to validated findings.
 
 ## Risk
 
@@ -8,12 +8,7 @@ Use this reference when assigning `Risk` and `Confidence` to validated findings.
 - `High`: serious unauthorized asset movement, irreversible freezing, or admin compromise with strong practical impact
 - `Medium`: meaningful but scoped loss, denial of service, or invariant break with constraints
 - `Low`: limited impact, hard-to-trigger edge case, or defense-in-depth weakness
-- `Informational`: clarity or maintainability only; usually omit unless the user asked for broad review notes
-
-## Confidence
-
-- `High`: the code directly proves attacker reachability, input obtainability, and the broken post-transaction state
-- `Medium`: the exploit path is well supported but still depends on one bounded assumption
-- `Low`: the issue is plausible but the code leaves material uncertainty
+- `Informational`: security-relevant clarity, observability, diagnostics, or maintainability weakness with little or no direct exploit impact
 
 If a finding depends on unverified deployment, governance, or off-chain behavior, prefer `Medium` or move it out of validated findings entirely.
+Validate and report well-supported `Medium`, `Low`, and `Informational` findings by default when they are grounded in code and materially help the reader understand risk, hardening gaps, or incident-response blind spots.

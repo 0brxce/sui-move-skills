@@ -1,7 +1,7 @@
 interface:
   display_name: "Sui Move Auditor"
-  short_description: "Audit Sui Move contracts with validated findings"
-  default_prompt: "Use $sui-move-auditor to audit this Sui Move package autonomously, print the startup banner from references/banner.txt once near the beginning, continue until the final report has been written to {project-name}-exvul-sui-move-audit-report.md in the current Codex workspace root, validate each candidate against reachability, capability obtainability, ownership rules, abort semantics, and direct code-backed evidence, keep rejected candidates out of findings, and delete temporary draft artifacts such as .codex-report-draft.md before finishing."
+  short_description: "Audit Sui Move contracts with validated findings and security review notes"
+  default_prompt: "Use $sui-move-auditor to audit this Sui Move package autonomously, print the startup banner from references/banner.txt once near the beginning, continue until the final report has been written to {project-name}-exvul-sui-move-audit-report.md in the current Codex workspace root, validate each candidate against the evidence standard appropriate to its severity, keep rejected candidates out of validated findings, include supported medium, low, and informational security issues when they are code-backed and relevant, and delete temporary draft artifacts such as .codex-report-draft.md before finishing."
 
 policy:
   allow_implicit_invocation: false
