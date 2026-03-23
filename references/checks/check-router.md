@@ -24,12 +24,12 @@ Global rules:
 | `check-02` | Shared objects, vaults, escrow, custody objects, wrappers, kiosk-like flows, or asset lifecycle transitions |
 | `check-03` | Mint, burn, withdraw, deposit, claim, rewards, fees, replay risk, or accounting and supply invariants |
 | `check-04` | Dynamic fields, tables, bags, derived storage, registries, cleanup, or keying mistakes |
-| `check-05` | `friend`, `public(package)`, upgrades, migrations, external trust assumptions, or cross-module privilege boundaries |
+| `check-05` | `friend`, `public(package)`, overexposed framework helpers, upgrades, migrations, external trust assumptions, or cross-module privilege boundaries |
 | `check-06` | Clock, epoch, oracle, price, timing, freshness, or market-assumption logic |
 | `check-07` | PTB composition, sequencing bugs, multi-step workflows, one-shot resources, pause controls, or emergency-function overreach |
-| `check-08` | Event coverage, observability, or abort-code quality that matters to monitoring or security-relevant workflows |
+| `check-08` | Event coverage, event forgery surfaces, observability, or abort-code quality that matters to monitoring or security-relevant workflows |
 
-Use `references/validation/false-positive-filters.md` only during the false-positive pass.
+Use the false-positive challenge questions in `references/validation/candidate-validation.md` only during the false-positive pass.
 
 ## Mandatory Pairings
 

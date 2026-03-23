@@ -31,3 +31,47 @@
 - **D:** One privileged capability or admin object can perform many unrelated actions such as pausing, fee changes, treasury withdrawal, and upgrade control with no internal role separation
 - **FP:** The broad capability scope is an intentional governance design with explicit trust assumptions, constrained wrappers, or documented multisig procedures
 - **Search:** `struct.*Cap`, admin entrypoints, and whether the same capability type gates unrelated privileged functions
+
+### 1.6 Signed Intent Missing Domain Binding
+
+- **D:** A signed payload is checked for cryptographic validity but is not bound to the actual caller, intended recipient, authorized object ID, or executor identity, allowing front-running, signer confusion, or arbitrary actor substitution
+- **FP:** The signed message commits to the caller or recipient, relevant object IDs, operation type, and any unique nonce or expiry needed to prevent reuse outside the intended context
+- **Search:** signature verification helpers, signed registration or claim flows, and whether the signed fields include `sender`, recipient, object IDs, role IDs, and operation-specific context
+
+### 1.7 Witnessless Privileged Capability Creation
+
+- **D:** A privileged capability, config authority, or admin object can be created from a public type parameter or generic path without a one-time witness, singleton guard, or equivalent module-controlled proof
+- **FP:** Capability creation requires a one-time witness, module-owned singleton state, or another non-forgeable proof that ties minting authority to the defining module
+- **Search:** constructors for `*Cap`, `Admin`, `Config`, or authority objects that accept generic type parameters, witness-like values, or publicly reachable initialization helpers
+
+### 1.8 Registry-Backed Role Not Verified
+
+- **D:** A function accepts a role, assistant, manager, or similar capability-like input but does not verify that the holder is still present in the authoritative registry or allowlist that defines active authorization
+- **FP:** The call checks both possession of the role object and current membership or status in the registry, table, or config that grants that role operational authority
+- **Search:** privileged calls that accept helper caps, assistant objects, signer-like handles, or role IDs, then compare them against authoritative role lists, registries, or config objects
+
+### 1.9 Generic Capability Factory Combined with Generic Acceptance
+
+- **D:** One module exposes a public generic constructor for `Cap<T>`, `Config<T>`, `Authority<T>`, or equivalent privileged objects, while another reachable module accepts arbitrary `T`-scoped caps, configs, or external objects without binding them to a canonical registry, witness lineage, or unique trusted type
+- **FP:** Generic capability creation is restricted to module-owned witnesses or singleton state, and any downstream generic verifier binds accepted objects to a canonical registry, lineage, or explicitly trusted `T`
+- **Search:** `new_cap<T>`, generic config or authority constructors, and downstream functions that accept `Cap<T>`, `Config<T>`, `Enclave<T>`, signer-like generic objects, or type-parameterized privileged inputs
+
+```move
+module demo::generic_caps {
+    use sui::object::UID;
+
+    public struct Cap<T> has key, store { id: UID }
+    public struct Worker<T> has key, store { id: UID }
+
+    // Bug surface A: anyone can mint a T-scoped privileged object.
+    public fun new_cap<T: drop>(ctx: &mut TxContext): Cap<T> {
+        Cap { id: object::new(ctx) }
+    }
+
+    // Bug surface B: downstream code accepts any Worker<T> paired with Cap<T>
+    // but never checks a canonical registry or witness lineage for T.
+    public fun run_job<T>(_cap: &Cap<T>, _worker: &Worker<T>) {
+        // privileged action
+    }
+}
+```

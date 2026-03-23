@@ -40,3 +40,9 @@ module demo::df_key_confusion {
 - **D:** Secondary registries, lookup tables, or ownership indices are updated on create but not on transfer, delete, or close, leaving stale entries that misroute later logic or operator actions
 - **FP:** Every lifecycle transition updates or clears the secondary index, or stale entries are harmless and never used for authorization or settlement
 - **Search:** registry or index writes such as `table::add`, `dynamic_field::add`, `vec_map::insert`, then compare create/update/delete paths for matching cleanup
+
+### 4.4 Derived Object Lineage Not Bound
+
+- **D:** A child, enclave, versioned instance, or derived object can later be upgraded, destroyed, or authorized using an unrelated parent or config object because the original creator or config ID was never stored and re-checked
+- **FP:** Derived objects persist the parent or config ID that created them, and all later maintenance or destruction paths verify the same lineage before acting
+- **Search:** create or register flows that derive one object from another, then upgrade, rotate, or destroy helpers that compare only version numbers or loose type matches instead of the original parent or config ID

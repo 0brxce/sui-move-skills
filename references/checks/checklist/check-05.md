@@ -49,3 +49,15 @@ module demo::migration {
 - **D:** Critical logic depends on an external package, privileged operator, or upgrade actor, but the trust assumption is not asserted in code comments, invariants, or wrapper checks near the call site
 - **FP:** The trust model is explicit in code, enforced by wrapper assertions, or isolated to a narrow adapter that documents expected guarantees
 - **Search:** fully-qualified external calls, upgrade helpers, governance hooks, and adjacent comments or postcondition checks explaining the trusted assumption
+
+### 5.6 Overexposed Framework or Helper Module Surface
+
+- **D:** A low-level framework, math, vault, or utility module exposes `public` functions that bypass the validation, policy, or lifecycle checks expected at the higher-level entry surface
+- **FP:** Internal building blocks are restricted with `public(package)`, `friend`, or equivalent wrappers, and any intentionally public helper is stateless or safe in isolation
+- **Search:** foundational modules with many `public fun` declarations, especially vault, authority, math, settlement, or state helpers that can be called without the normal coordinator flow
+
+### 5.7 Deployment-Dependent Trust Boundary Weakness
+
+- **D:** The code accepts any object, enclave, signer, assistant, or external actor that satisfies a broad technical predicate such as matching PCRs, type shape, or config version, even though the intended security model appears to require a narrower, uniquely controlled trust domain
+- **FP:** The code binds trust to a specific authorized registry, owner set, canonical object ID, or lifecycle-controlled allowlist rather than relying on deployment discipline alone
+- **Search:** registration and acceptance rules for enclaves, assistants, signers, or external modules; look for broad predicates like measurement match, version comparison, or type compatibility without a narrower authorized identity binding
