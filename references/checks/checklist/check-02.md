@@ -26,28 +26,20 @@
 - **FP:** Wrap or unwrap helpers enforce identical checks as the main entry functions
 - **Search:** wrapper or container helper functions, `dynamic_field::add`, `dynamic_field::remove`, `dynamic_object_field::add`, `dynamic_object_field::remove`, and custom deposit or withdraw helpers for resource-holding objects
 
-```move
-module demo::vault_wrap {
-    use sui::object::{Self, UID};
-
-    public struct Position has key, store { id: UID, owner: address, amount: u64 }
-    public struct Vault has key, store { id: UID }
-
-    // Bug: direct wrap path never checks sender == position.owner.
-    public fun wrap(vault: &mut Vault, position: Position) {
-        // dynamic_object_field::add(&mut vault.id, b"position", position)
-    }
-
-    // Safe shape: require the same auth check used in the normal withdraw path.
-    public fun wrap_checked(vault: &mut Vault, position: Position, sender: address) {
-        assert!(sender == position.owner, 0);
-        // dynamic_object_field::add(&mut vault.id, PositionKey {}, position)
-    }
-}
-```
-
 ### 2.5 Unbounded Shared-State Growth
 
 - **D:** User-reachable flows can append receipts, orders, claims, or metadata into a shared object or its child storage without per-user bounds, pruning, or economic friction
 - **FP:** Growth is bounded by deposits, storage rebates, per-user quotas, or explicit cleanup paths that keep operational state under control
 - **Search:** `dynamic_field::add`, `table::add`, `bag::add`, shared object mutation in user flows, and whether the write path has bounds or cleanup
+
+### 2.6 Pool / Position Lineage Not Re-Checked
+
+- **D:** A function accepts both a pool-, market-, or vault-like object and a position, receipt, debt bag, or ticket, but never verifies that the child object was created for that exact parent lineage before collecting fees, repaying debt, liquidating, or settling
+- **FP:** The child object stores the canonical parent ID, market ID, or equivalent lineage marker, and every maintenance or value-moving path re-checks it before acting
+- **Search:** `position`, `pool_object`, `market`, `vault`, `collect_fee`, `liquidate`, `repay`, `settle`, and whether the code compares stored parent IDs or lineage fields against the passed object
+
+### 2.7 Share Namespace or Pool Pairing Not Verified
+
+- **D:** A deleverage, liquidation, repay, or accounting helper accepts a pool, share bag, registry, or share balance whose semantic share namespace can differ from the position or debt state being operated on, allowing a wrong but shape-compatible pool or share container to influence rewards, repayment, or settlement
+- **FP:** The flow binds every share bag, registry, or balance to the exact canonical pool, registry, or share type expected by the position, and asserts that pairing before burning, repaying, or distributing value
+- **Search:** `SupplyPool`, share bags, debt bags, registry-like objects, and helpers that take both pool-like inputs and position or debt state without lineage or namespace checks

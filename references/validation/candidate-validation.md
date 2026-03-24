@@ -9,6 +9,7 @@ Use this reference when deciding whether a candidate becomes `Validated`, `Rejec
 - `Unknown`: The candidate depends on a material assumption that the code does not resolve, such as undisclosed governance, off-chain coordination, or deployment-specific wiring.
 
 Prefer `Rejected` or `Unknown` over forcing a weak `Validated` finding, but do not reject a candidate solely because its severity is below `High`.
+When a candidate originates from a prior audit finding, always pair the validation status with a regression label of `Still Valid`, `Changed Form`, `Fixed`, or `Unknown`. A nearby new guard is not enough to mark the family closed.
 
 ## Evidence Threshold by Finding Class
 
@@ -20,6 +21,16 @@ Prefer `Rejected` or `Unknown` over forcing a weak `Validated` finding, but do n
 For signed workflows, do not require proof that every downstream monetization or repeat-use window has already been exercised on-chain. If the code shows that authorization can be reused across distinct objects, requests, amounts, or later-valid state windows that should have required fresh approval, treat that replay surface itself as sufficient evidence for `Validated`, usually at `Medium`.
 Apply the same principle outside signed flows: when the code already shows a concrete broken boundary such as invariant drift across alternate paths, lifecycle authorization mismatch, immediate post-commit parameter changes, or unbounded state growth with real liveness cost, do not require the reviewer to prove the strongest possible downstream exploit before validating the issue.
 For mutable-term workflows, do not require extra off-chain evidence about what an enclave, relayer, or frontend happens to read if the on-chain request object fails to snapshot the price, prompt, route, or other user-committed terms and later execution can still depend on mutable global state. That missing binding is itself sufficient code-backed evidence for a lower-severity finding.
+When prior audits or historical findings exist, do not reject a candidate merely because the code now contains some added checks near the old path. Determine whether the original invariant is fully restored on every equivalent path, only partially restored, or still broken in changed form.
+
+## Historical Regression Rules
+
+- `Fixed`: The original root cause is closed on every equivalent reachable path that can affect the same invariant, and the current code shows the full restoration directly.
+- `Still Valid`: The same root cause remains reachable in the same path family or module family with materially the same invariant break.
+- `Changed Form`: The exact old path changed, but the original invariant is still broken through a different helper, sibling path, or partially patched variant.
+- `Unknown`: A material deployment, governance, or integration assumption prevents a code-backed conclusion.
+
+Do not mark a prior finding family `Fixed` after validating only one patched function if sibling liquidation, deleverage, settlement, fee-collection, or maintenance paths still touch the same invariant and were not traced.
 
 ## Validation Questions
 
@@ -33,10 +44,12 @@ Answer these for each candidate before reporting it:
 6. What invariant, authorization boundary, or custody property is broken if the transaction succeeds?
 7. Is the outcome concrete enough to matter: theft, unauthorized privilege, stuck funds, irreversible state breakage, meaningful denial of service, weakened trust boundary, lost observability, or another security-relevant downside?
 8. What direct code-backed evidence shows the exploit path, missing protection, or broken invariant?
+9. If there was a prior audit or known finding on the same root cause, is the current result `Still Valid`, `Changed Form`, or `Fixed`, and what exact code path supports that conclusion?
 
 For exploitability claims such as theft, unauthorized control, stuck funds, or meaningful denial of service, questions 1 through 6 must be answered concretely from the target code and realistic assumptions.
 For lower-severity findings such as defense-in-depth, observability, or diagnostics issues, questions 1, 4, 6, 7, and 8 must still be answered concretely. Questions 2, 3, and 5 may be marked not applicable when the issue does not depend on attacker-supplied objects, capability obtainability, or PTB composition.
 If the required questions for the finding class cannot be answered clearly, do not mark the issue `Validated`.
+If question 9 applies and cannot be answered concretely, do not mark the issue family `Fixed`.
 
 Do not downgrade or reject a lower-severity candidate solely because a stronger exploitability finding exists on the same feature path. Treat distinct downsides such as stale signatures, replayable signatures, event authenticity gaps, zero-value state refreshes, and trust-boundary weaknesses as separate candidates when the code supports them independently.
 Do not require the candidate to prove every contingent follow-on condition when the broken boundary is already concrete. Missing object-instance binding, missing amount binding, reusable epoch-scoped nonces, and signatures that survive later re-funding or later-valid state transitions are independently meaningful even if the final cash-out depends on future state.
@@ -49,6 +62,7 @@ Keep a short internal note for each candidate using this structure:
 ```markdown
 - Candidate: ...
 - Status: Candidate | Validated | Rejected | Unknown
+- Regression: New | Still Valid | Changed Form | Fixed | Not Applicable
 - Entrypoint: ...
 - Caller Controls: ...
 - Required Object/Capability: ...
@@ -62,6 +76,8 @@ When the evidence depends on a specific trace, include:
 - the relevant function path, object flow, or capability chain
 - the abort behavior or state transition that makes the issue real or disproves it
 - any assumption that cannot be resolved from code alone
+
+If the candidate came from a prior audit, include the prior finding ID or title in the note and name the current code locations checked before deciding the regression outcome.
 
 ## False-Positive Challenge Questions
 
@@ -82,6 +98,7 @@ Use these challenge questions during validation. They are prompts to re-read the
 - Is the issue truly unreportable without deployment knowledge, or does the code itself expose a weakened trust boundary, broad acceptance rule, or unsafe lifecycle path?
 - Is the candidate being filtered out only because the exact off-chain consumer behavior is unknown, even though the on-chain request, ticket, or workflow state plainly fails to bind the terms that downstream execution is supposed to honor?
 - Is the candidate being filtered out only because a stronger theft or privilege-escalation finding exists nearby, even though it still has an independent downside such as replayable authorization, event authenticity loss, lock extension, fairness break, or growth-based liveness degradation?
+- Is the candidate being filtered out only because a nearby function now has a local guard, even though an equivalent liquidation, deleverage, settlement, fee-collection, or maintenance path was never traced end to end?
 
 ## Escalation Rules
 

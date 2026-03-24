@@ -21,8 +21,8 @@ Global rules:
 | Check | Load When |
 |---|---|
 | `check-01` | Caps, witness types, admin objects, role objects, privileged authority, recovery flows, or sender-gating |
-| `check-02` | Shared objects, vaults, escrow, custody objects, wrappers, kiosk-like flows, or asset lifecycle transitions |
-| `check-03` | Mint, burn, withdraw, deposit, claim, rewards, fees, replay risk, or accounting and supply invariants |
+| `check-02` | Shared objects, vaults, escrow, custody objects, wrappers, kiosk-like flows, asset lifecycle transitions, or pool/position pairings that must stay bound to one another |
+| `check-03` | Mint, burn, withdraw, deposit, claim, rewards, fees, replay risk, accounting and supply invariants, share or debt registries, or precision-sensitive fixed-point math |
 | `check-04` | Dynamic fields, tables, bags, derived storage, registries, cleanup, or keying mistakes |
 | `check-05` | `friend`, `public(package)`, overexposed framework helpers, upgrades, migrations, external trust assumptions, or cross-module privilege boundaries |
 | `check-06` | Clock, epoch, oracle, price, timing, freshness, or market-assumption logic |
@@ -37,6 +37,7 @@ Use the false-positive challenge questions in `references/validation/candidate-v
 - If `check-01` applies and authority depends on package boundaries, upgrades, or migration flows, also load `check-05`.
 - If `check-02` applies and shared objects hold balances, vault accounting, mint state, or redeemable assets, also load `check-03`.
 - If `check-02` applies and asset safety depends on sequencing or single-transaction composition, also load `check-07`.
+- If `check-02` applies and functions accept both a pool-like object and a position, debt bag, or share container that must refer to the same lineage, also load `check-03`.
 - If `check-03` applies and accounting or redemption logic depends on oracle or time inputs, also load `check-06`.
 - If `check-04` applies and storage structure affects custody, balances, or entitlement lookup, also load `check-02` or `check-03`.
 - If `check-05` applies and upgrade, migration, or maintenance flows can be combined with user-reachable calls, also load `check-07`.

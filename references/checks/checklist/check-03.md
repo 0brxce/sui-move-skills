@@ -20,29 +20,6 @@
 - **FP:** There is one source of truth, or derived values are computed from `balance::value()` on read rather than stored separately
 - **Search:** Fields named `total_*`, `balance_*`, or `amount_*` as `u64` alongside real `Balance<T>` fields
 
-```move
-module demo::ledger_drift {
-    use sui::balance::{Self, Balance};
-    use sui::object::UID;
-
-    public struct Vault<T> has key, store {
-        id: UID,
-        balance: Balance<T>,
-        total_deposited: u64,
-    }
-
-    public fun deposit<T>(vault: &mut Vault<T>, coin_value: u64) {
-        vault.total_deposited = vault.total_deposited + coin_value;
-        // balance::join(&mut vault.balance, coin_into_balance(coin))
-    }
-
-    // Bug: withdraw changes real balance but forgets total_deposited.
-    public fun admin_skim<T>(vault: &mut Vault<T>, amount: u64): Balance<T> {
-        balance::split(&mut vault.balance, amount)
-    }
-}
-```
-
 ### 3.4 Amount Boundary / Replay Gaps
 
 - **D:** Missing checks for zero amounts, min or max bounds, identical in and out asset types in conversion flows, duplicate reward claims, or repeated voucher redemptions
@@ -108,3 +85,27 @@ module demo::ledger_drift {
 - **D:** A lock, cooldown, reward, or solvency invariant is maintained on the obvious deposit or funding path but not on another reachable path that changes the same balance or entitlement state
 - **FP:** Every path that increases or decreases the relevant balance, reward base, or locked value updates the same associated timestamps, checkpoints, and guard state consistently
 - **Search:** all writes to `balance`, `value`, `amount`, `last_*`, lock timestamps, cooldown markers, and reward checkpoints; compare the main funding path against settlement, request, refund, admin, and helper-driven balance changes
+
+### 3.15 Zero-Value Bootstrap Issuance or Dilution
+
+- **D:** A share, equity, or debt issuance helper treats `underlying_value == 0` or `liability_value == 0` as a bootstrap case and seeds `supply` from caller-controlled input without also proving canonical registry provenance and `supply == 0`, enabling unbacked share minting or dilution after a partial reset
+- **FP:** Bootstrap issuance is reachable only for canonical initialization or tightly controlled migration, and the code asserts both aggregate value and total supply are zero before seeding the first shares
+- **Search:** `underlying_value`, `liability_value`, `supply`, `if .*== 0`, `return .*Share`, and issuance helpers that assign both total value and total supply from the same input
+
+### 3.16 Division-Before-Multiplication Precision Loss
+
+- **D:** Fixed-point math divides an intermediate ratio before multiplying by liquidity, notional, or position size, causing truncation to zero or materially undercounted amounts that bias rewards, collateral, liquidation proceeds, or settlement
+- **FP:** The formula multiplies before division when safe, or uses a higher-precision intermediate representation with an explicit and documented rounding policy
+- **Search:** `x64`, `x128`, `u256`, comments showing `num / denom`, and formulas where `num / denom` is computed before multiplying by liquidity, amount, or balance
+
+### 3.17 Unsafe Round-Up Helper Overflow
+
+- **D:** A helper implements ceil division as `(a + b - 1) / b` or a similar pattern on `u64`, `u128`, or `u256` without guarding the intermediate addition, so extreme inputs can overflow or abort unexpectedly
+- **FP:** The helper short-circuits zero, validates non-zero divisors, and uses an overflow-safe formula or explicit checked addition before dividing
+- **Search:** `divide_and_round_up`, `(a+b-1)/b`, `+ ... - 1` near division helpers, and arithmetic utilities reused in fee, share, or liquidation math
+
+### 3.18 Missing Bounds on Economic Setters
+
+- **D:** Privileged setter or configuration functions can write fees, leverage factors, curve parameters, liquidation thresholds, or similar economic values with no sanity bounds or cross-field consistency checks, making unsafe or illogical states reachable
+- **FP:** Every setter enforces documented min or max ranges, cross-field relationships, and non-zero or monotonicity constraints needed by downstream math and risk logic
+- **Search:** `set_`, `update_`, `configure_`, `bps`, `factor`, `curve`, `threshold`, `limit`, `timelock`, and whether setters assert acceptable ranges before storing values

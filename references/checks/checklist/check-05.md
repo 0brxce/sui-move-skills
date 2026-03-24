@@ -26,24 +26,6 @@
 - **FP:** Explicit migration entry points or lazy migration patterns handle old object formats, and regression tests cover the old-to-new object lifecycle
 - **Search:** migration functions, version fields, schema-dependent branching, versioned objects, and upgrade helpers that transform old state
 
-```move
-module demo::migration {
-    use sui::object::UID;
-
-    // v1
-    public struct Pool has key, store { id: UID, total: u64 }
-
-    // v2 expectation: reward_index must be initialized before claim/settle logic runs.
-    // If old Pool objects survive the upgrade without migration, later logic can read
-    // an uninitialized semantic state or assume a default that breaks accounting.
-    public fun migrate(pool: &mut Pool) {
-        // Safe shape after a versioned upgrade:
-        // pool.version = 2;
-        // pool.reward_index = 1_000_000_000;
-    }
-}
-```
-
 ### 5.5 Undocumented External Trust Assumption
 
 - **D:** Critical logic depends on an external package, privileged operator, or upgrade actor, but the trust assumption is not asserted in code comments, invariants, or wrapper checks near the call site

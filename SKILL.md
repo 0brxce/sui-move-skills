@@ -23,6 +23,8 @@ Read `references/checks/check-router.md` twice:
 - once after initial scoping, to decide which topic references to load
 - once before finalizing findings, to confirm coverage and eliminate blind spots
 
+If any prior audit artifact exists in the target workspace, such as a PDF, markdown report, issue list, or patch note that names historical findings, treat it as mandatory input. Do not begin fresh bug hunting until those prior findings have been converted into a regression checklist with explicit current-code anchors.
+
 Treat `references/checks/check-router.md` as the checklist router and loading guide. Treat this file as the workflow and reporting layer.
 
 Some harder checklist items include tiny Sui Move examples. Use them to recognize the state transition or invariant being discussed, but never treat the example match alone as a finding.
@@ -46,14 +48,15 @@ Prioritize real impact over surface-level observations. A good finding in Sui Mo
 
 Use `references/workflow.md` for the full step-by-step procedure.
 
-1. Scope the package and identify trust boundaries before loading topic checks.
+1. Scope the package, identify trust boundaries, and collect any prior audits, issue trackers, or historical findings before loading topic checks.
 2. Build a privilege and asset map to anchor the rest of the review.
-3. Route the package to the relevant checklist topics and skip the rest explicitly.
-4. Trace critical state transitions instead of reasoning from isolated lines.
-5. Test attacker-controlled reachability and function composition paths.
-6. Validate each candidate against the evidence standard appropriate to its severity: exploitability for higher-impact findings, or concrete security and operational downside for lower-severity findings.
-7. Run a false-positive pass that tries to disprove every remaining candidate.
-8. Assemble the final report using validated findings and code-backed lower-severity review notes.
+3. If prior findings exist, convert them into a regression matrix before fresh bug hunting and classify each as fixed, still valid, changed form, or unresolved.
+4. Route the package to the relevant checklist topics and skip the rest explicitly.
+5. Trace critical state transitions instead of reasoning from isolated lines.
+6. Test attacker-controlled reachability and function composition paths.
+7. Validate each candidate against the evidence standard appropriate to its severity: exploitability for higher-impact findings, or concrete security and operational downside for lower-severity findings.
+8. Run a false-positive pass that tries to disprove every remaining candidate.
+9. Assemble the final report using validated findings and code-backed lower-severity review notes.
 
 ## Working Style
 
@@ -63,6 +66,10 @@ Use `references/workflow.md` for the full step-by-step procedure.
 - Use `references/checks/check-router.md` for depth and coverage, not as a substitute for code-backed reasoning.
 - Execute the full audit flow autonomously until the final report file has been written unless a critical input is missing or the target is ambiguous.
 - Keep this skill source-first.
+- If prior audit reports or known findings exist, build a concrete regression checklist from them before concluding that a subsystem is safe.
+- Treat the historical regression checklist as a blocking deliverable, not a best-effort note. Do not finalize coverage or the report until every prior finding has an explicit `Fixed`, `Still Valid`, `Changed Form`, or `Unknown` outcome with code-backed justification.
+- Do not let early wins in one module starve equally critical neighboring modules of review depth; rebalance coverage before finishing.
+- Treat localized new checks as evidence to verify, not proof that the whole call chain is now safe.
 - During candidate validation, prefer direct evidence from reachable call paths, object flow, capability flow, and broken invariants instead of speculative reasoning.
 - Do not discard a well-supported issue solely because it is medium, low, or informational. Only discard it when the code does not support it or it is irrelevant to security or defensibility.
 - If dynamic verification is not feasible because the package lacks a runnable test setup, the path depends on non-local environment state, or the proof would be misleading, state that limitation explicitly and fall back to source-backed validation.

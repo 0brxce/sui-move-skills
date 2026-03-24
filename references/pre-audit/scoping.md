@@ -7,6 +7,7 @@ Use this reference during initial package inventory and trust-boundary mapping.
 Record at least:
 
 - `Move.toml`, named addresses, and package dependencies
+- any prior audit reports, issue trackers, patch notes, or historical findings that refer to this package or the same module family
 - all modules and their trust boundaries
 - all `entry`, `public`, `public(package)`, `friend`, and `init` functions
 - all structs with `key`, important `store` types, and capability or witness types
@@ -34,6 +35,7 @@ At the end of scoping, keep compact working notes for:
 
 - in-scope modules
 - out-of-scope modules and why
+- prior findings or prior reports that must be regressed, including the affected modules or invariants
 - privileged objects and capabilities
 - user asset objects
 - main trust boundaries

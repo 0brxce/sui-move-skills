@@ -3,6 +3,8 @@
 ## 1. Scope the package
 
 Use `references/pre-audit/scoping.md` to build a compact inventory, identify trust boundaries, and decide whether any test, demo, mock, or migration helper code belongs in scope because it touches production authority or state.
+If prior audit reports, issue trackers, or historical finding documents are available, pull them into scope immediately as regression inputs rather than deferring them until after fresh bug hunting.
+If the prior artifact is a PDF or another non-plain-text format, extract the finding list first and keep a compact note with severity, title, and affected module family before reviewing the code.
 At the end of scoping, read `references/checks/check-router.md` and select only the sections that apply to this package.
 
 ## 2. Build a privilege and asset map
@@ -12,10 +14,24 @@ Record the user-asset objects, admin or mint authority objects, capability lifec
 This privilege map is the base layer for the rest of the audit. If it is unclear, stop and resolve it before going deeper.
 For every security-relevant invariant, list all reachable write paths that can change it. Do not stop after tracing the obvious deposit or withdraw function; include alternate funding paths, settlement helpers, maintenance flows, and lifecycle hooks that touch the same state.
 
+## 2.5 Build a historical finding regression matrix
+
+Before deep review, convert each prior finding into a compact regression checklist entry with:
+
+- the original root cause or broken invariant
+- the previously affected module or function family
+- the current code locations that appear to address it
+- the reachable paths that still need verification
+- a status bucket: `Fixed`, `Still Valid`, `Changed Form`, or `Unknown`
+
+Do this before spending most of the review budget on newly discovered issues. Historical regression should guide prioritization, especially for modules that previously held high-severity findings.
+Do not treat this matrix as optional working scratch. It is a gating artifact for the rest of the review. If any prior finding lacks a current-code anchor or equivalent-path review target, stop and finish that mapping first.
+
 ## 3. Choose review paths from the checklist
 
 Use `references/checks/check-router.md` to decide which categories need focused review and skip the ones that are clearly out of scope.
 When a selected checklist item includes a code sketch, map the sketch to the target package's real objects, capabilities, and call graph before drawing any conclusion.
+Do not allow one bug-rich subsystem to consume the whole review budget while peer critical modules remain only lightly sampled. Rebalance coverage before moving on.
 
 ## 4. Trace critical state transitions
 
@@ -30,6 +46,7 @@ For each privileged or asset-moving path, trace:
 
 Audit transitions, not isolated lines. The key question is who can move an object or capability into a dangerous state.
 When a module appears to be a signature, oracle, enclave, or adapter layer, still review it as a full lifecycle state machine: registration, update, replacement, destruction, and stale-object behavior often carry separate authorization bugs.
+When a codebase appears to have patched an old issue, verify every equivalent path instead of stopping at the first new guard such as `pool_object_id()`, config ID checks, or share-type assertions.
 
 ## 5. Review attacker-controlled reachability
 
@@ -57,6 +74,7 @@ Before promoting a candidate issue into a finding, confirm:
 - the finding is supported by direct code-backed evidence such as reachable call flow, concrete inputs, and invariant-breaking state transitions
 
 Use `references/validation/candidate-validation.md` as the validation checklist and status model for each candidate.
+When a candidate comes from a prior audit finding, validation must answer whether the original root cause is `Still Valid`, `Changed Form`, `Fixed`, or `Unknown` across every equivalent reachable path. Do not close the family after checking only the first nearby guard.
 
 If a candidate claims theft, unauthorized control, or a meaningful invariant break, you must identify attacker-controlled inputs, reachable calls, and the broken invariant before reporting it. For lower-severity findings such as defense-in-depth, observability, or maintainability weaknesses, require a concrete reachable code path and a clear security-relevant downside even if there is no full exploit path. Use `references/checks/check-router.md` to pressure-test whether you missed a stronger exploit path.
 
@@ -78,6 +96,9 @@ During this pass, explicitly check whether the package has any of the following 
 - event fields that are emitted as if authenticated, but are not covered by the signed payload or committed state transition
 - trust-boundary assumptions that are code-reachable and security-relevant but rely on deployment or operator discipline
 - registries, vectors, tables, or tracking lists that only grow and can degrade liveness, monitoring, or maintenance safety
+- bootstrap issuance or registry-reset paths that seed share supply, debt supply, or aggregate value from caller-controlled input when the current totals are zero
+- precision-sensitive math that divides before multiplying, rounding helpers that can overflow on intermediate addition, or piecewise or curve helpers that lack boundary and ordering validation
+- privileged setters that can write economically dangerous or illogical parameters with no sanity bounds
 
 Retain these issues as validated lower-severity findings when the code shows a concrete downside. Do not drop them solely because they are not the strongest issue on the path.
 
@@ -106,6 +127,9 @@ Only keep findings that survive this pass. Drop speculative or assumption-heavy 
 
 Before writing the report, reconcile the reviewed code against the routed checklist topics and ask:
 
+- Did every prior audit finding get a regression status of `Fixed`, `Still Valid`, `Changed Form`, or `Unknown` with code-backed justification?
+- Did early findings in one subsystem cause neighboring critical modules to receive shallower review than their asset movement or prior bug history warranted?
+- Did I treat local new checks as proof of safety without tracing every equivalent path to the same invariant?
 - Did a stronger exploitability finding cause a nearby advisory-grade issue to be omitted?
 - Did every user-reachable signature flow get checked for domain binding, freshness, object-level uniqueness, amount binding, and event authenticity?
 - Did any signed or approved workflow authorize a generic outcome without binding the exact object instance, storage location, or economic effect that later consumes it?
@@ -117,8 +141,10 @@ Before writing the report, reconcile the reviewed code against the routed checkl
 - Did every already-committed user flow get checked for immediate parameter or policy changes that can alter terms without delay?
 - Did every registry or tracking structure get checked for duplicate entries, stale entries, and unbounded growth?
 - Did every oracle or feed-selection loop get checked for uniqueness, ordering, and validation-before-selection behavior?
+- Did bootstrap issuance, debt dilution, curve validation, or arithmetic-helper edge cases get reviewed for advisory-grade but code-backed weaknesses?
 
 If any of these questions reveal a concrete, code-backed issue, add it before finalizing.
+If any prior audit finding still lacks a regression status, the review is not ready to finalize.
 
 ## 10. Assemble the audit report
 

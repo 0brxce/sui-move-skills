@@ -9,9 +9,10 @@ The final report should contain only these sections, in this order:
 1. `# Audit Report`
 2. `## Information`
 3. `## Findings Summary`
-4. Detailed validated findings, ordered by risk
-5. `## Rejected or Unvalidated Issues`
-6. `## Checklist Coverage`
+4. `## Historical Regression Matrix` when prior audit artifacts or historical findings were available
+5. Detailed validated findings, ordered by risk
+6. `## Rejected or Unvalidated Issues`
+7. `## Checklist Coverage`
 
 Do not add extra sections unless the user explicitly asks for them.
 
@@ -59,6 +60,27 @@ Rules:
 - Put candidates that were reviewed but not validated into `Unvalidated`.
 - If there are no validated findings, keep all validated severities at `0`.
 
+## Historical Regression Matrix
+
+When prior audit artifacts, issue trackers, or historical findings were available during the review, add a compact table immediately after `## Findings Summary`:
+
+```markdown
+## Historical Regression Matrix
+
+| Prior Finding | Current Status | Current Location | Notes |
+|---|---|---|---|
+| `OS-EXAMPLE-00` Missing pool lineage check | Still Valid | `position_core::liquidate_col_x` | Same root cause remains on liquidation path |
+| `OS-EXAMPLE-01` Precision loss in helper | Fixed | `position_model::x_by_liquidity_x64` | Formula now multiplies before dividing |
+```
+
+Rules:
+
+- Include every prior finding exactly once when prior findings were in scope.
+- `Current Status` must be one of `Fixed`, `Still Valid`, `Changed Form`, or `Unknown`.
+- `Current Location` should point to the main current module or function family that supports the status.
+- `Notes` should stay short and state why the status is justified.
+- Do not omit the matrix merely because the final validated findings are all new.
+
 ## Checklist Coverage
 
 Add a compact table showing which checklist topics were applied or skipped:
@@ -90,6 +112,7 @@ Use this structure for each validated issue:
 |---|---|
 | Risk | High |
 | Affected | `vault::reconfigure` |
+| Regression | New |
 | Status | ✅ Validated |
 
 **Description**  
@@ -116,6 +139,8 @@ Rules:
 - Keep each validated issue concise.
 - Do not include long attack narratives unless they are necessary to justify exploitability.
 - `Affected` should point to the main module or function.
+- Add `Regression` when prior audit reports, issue trackers, or historical findings exist. Use one of `New`, `Still Valid`, `Changed Form`, or `Not Applicable`.
+- If a validated finding corresponds to a prior finding family, its `Regression` field must match the row used in `## Historical Regression Matrix`.
 - `Status` must be `✅ Validated`.
 - Add a short code excerpt immediately after `Description` when it materially helps the reader see the bug.
 - Keep code excerpts brief and focused on the vulnerable check, state update, or transfer logic.
@@ -155,6 +180,7 @@ Rules:
 - Keep the report compact and delivery-oriented.
 - Only include validated issues in the detailed findings section.
 - If no validated findings remain, still include `Information`, `Findings Summary`, `Rejected or Unvalidated Issues`, and `Checklist Coverage`.
+- If prior findings were in scope, still include `Historical Regression Matrix` even when no validated findings remain.
 - Include validated `Medium`, `Low`, and `Informational` findings by default when they are code-backed. Do not omit them solely because they are not directly exploitable.
 - Default output directory is the current Codex workspace root unless the user asks for another path.
 - Default report filename is `{project-name}-exvul-sui-move-audit-report.md`.
