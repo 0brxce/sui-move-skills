@@ -53,3 +53,14 @@ Use the false-positive challenge questions in `references/validation/candidate-v
 - Skip `check-08` only if the user explicitly requests an exploitability-only review and events or abort codes clearly do not affect any monitored or security-relevant workflow.
 
 Do not skip a topic just because the package is small. Record routed and skipped topics in working notes.
+
+## Cross-Cutting Detection Tactics
+
+Independent of the routed topics, run these sweeps on every package (see `references/pre-audit/review-lens.md` → Detection Tactics):
+
+- Sibling-function diff: compare functions that do the same class of operation (`collect_*`, `add_*`, `withdraw_*`, `*_fix_*`) for a guard, argument, assertion, or event present in one and missing in the other (`check-03.4`, `check-05.8`, `check-08.1`).
+- External-call argument and precondition reasoning, even when the dependency is unreadable (`check-05.8`, `check-05.9`).
+- Precision magnitude: compute truncating divisions with an 18-decimal token before calling them dust (`check-03.19`).
+- Caller-supplied price/anchor not bound to a canonical source (`check-06.6`).
+- Pause walked from the recovery side: which emergency paths does the pause disable (`check-07.8`)?
+- Exhaustive enumeration of cheap checks (missing events, non-zero validation, event/state mismatches) — they travel in packs.

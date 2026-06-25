@@ -6,7 +6,7 @@
 
 - **D:** Admin actions, capability transfers, or fund movements do not emit `event::emit`
 - **FP:** Every sensitive state change emits a typed event with enough fields for incident reconstruction
-- **Search:** Admin or fund-moving functions without `event::emit` calls
+- **Search:** Admin or fund-moving functions without `event::emit` calls. Build a matrix of every public value-moving or state-changing function vs the event it emits, and flag any function that emits none — especially when a sibling operation in the same module does (e.g., `deposit`/`withdraw`/`harvest` emit but `collect_fee`/`close_position` do not, or `emergency_pause`/`emergency_unpause` change global state silently)
 
 ### 8.2 Non-Actionable Abort Codes
 

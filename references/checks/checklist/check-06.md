@@ -31,3 +31,9 @@
 - **D:** Oracle aggregation or feed-selection logic allows duplicate feed IDs, updates the chosen candidate before validating confidence or quality thresholds, or otherwise lets an invalid source crowd out the newest valid reading
 - **FP:** Feed IDs are unique within each selection set, and candidate replacement occurs only after all required validity checks such as confidence, staleness, and format integrity pass
 - **Search:** loops over oracle or feed IDs, uniqueness assumptions without explicit checks, and selection logic that compares timestamps before verifying confidence, deviation, or feed validity
+
+### 6.6 Caller-Supplied Price or Anchor Not Bound to Canonical Source
+
+- **D:** A price, `sqrt_price`, rate, or index used for accounting, share, valuation, or reward weight is accepted as a function parameter and only sanity-checked (within a tick range or numeric bounds), never read from or asserted equal to the canonical on-chain source it claims to represent, letting a stale or skewed but range-valid value bias accounting in the setter's favor
+- **FP:** The accounting value is read directly from the canonical object (e.g., `get_pool_sqrt_price`), or the supplied value is asserted equal to (or within a tight, documented tolerance of) the live canonical reading before being stored or used
+- **Search:** entrypoints taking `sqrt_price`/`price`/`rate` parameters later used in share, reward, collateral, or settlement math, and whether the value is bound to the live pool/oracle rather than only checked for range membership. Do not auto-dismiss this as "trusted admin input" when a canonical on-chain source is available in the same call

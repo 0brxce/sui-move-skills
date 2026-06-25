@@ -26,3 +26,14 @@ Use this reference before deep review and during false-positive validation.
 - If a concern turns on framework behavior such as transfer semantics, dynamic-field ownership, coin supply handling, or abort effects, keep the conclusion conservative unless the target code itself makes the behavior clear.
 - Do not require every validated issue to look like immediate theft. A reachable code-backed fairness break, lifecycle authorization drift, invariant mismatch across equivalent paths, or cumulative liveness degradation is still a real security outcome.
 - Do not mark an issue family as fixed just because some nearby functions now check `pool_object_id`, config IDs, share types, or similar guard fields. Re-run the full call chain and equivalent paths before closing the family.
+
+## Detection Tactics
+
+Apply these on every review; they catch bug classes that single-function reading misses.
+
+- Diff sibling functions that perform the same class of operation. An argument, guard, assertion, or event that is present in one and absent in the other is a strong bug signal. Examples: `add_liquidity` (asserts `delta_liquidity > 0`) vs `add_liquidity_fix_coin` (no such check); `collect_fee` (passes `0xFFFFFFFFFFFFFFFF` as the max) vs `collect_clmm_reward` (passes a caller coin's `value` as the max).
+- When a dependency is absent or unreadable, reason from the visible call site rather than filing a caveat. For each argument, ask "is this the value the callee expects?"; for each external `burn`/`destroy`/`close`/`swap`, state the conventional callee post-condition and verify the caller satisfies it. The two most damaging misses are usually wrong-argument and unmet-callee-precondition bugs that are fully provable from the caller.
+- For any truncating integer division, compute the realistic magnitude before labeling it "dust." Use an 18-decimal token and a large supply or share. Truncation that floors a reward/interest increment to zero and blocks all payouts is High severity, not informational.
+- Do not over-apply the trusted-admin filter to caller- or admin-supplied economic inputs (price, anchor, rate, share weight). When a canonical on-chain source for that value exists in the same call, a missing binding to it is a validated lower-severity finding even under a trusted-admin model.
+- Walk the pause/emergency state machine from the recovery side, not just the lockdown side: enumerate which admin and recovery functions the pause itself disables. A rescue path gated by the same check the pause trips is a real defect.
+- Enumerate exhaustively rather than stopping at the first instance. After finding one missing event, one missing non-zero check, or one event/state mismatch, list every peer function and confirm each — the cheap checks travel in packs.

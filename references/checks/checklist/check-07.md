@@ -43,3 +43,15 @@
 - **D:** A signed workflow step is bound only to coarse fields such as `user`, `agent`, `epoch`, or a reusable nonce, but not to the exact ticket, object ID, spend amount, or single-use authorization instance, allowing one valid signature to be replayed across multiple objects, requests, or later re-funding windows
 - **FP:** Every signed action is bound to the exact object or ticket being consumed, the economic amount or effect being authorized, and a nonce or spent marker that is unique for that authorization instance and cannot be reused across same-epoch or same-user requests
 - **Search:** signed payloads that include `nonce`, `epoch`, `request_id`, `ticket`, `attack`, `receipt`, or `amount`; compare the signed fields against the actual object consumed and ask whether two distinct objects can share the same signature domain
+
+### 7.8 Emergency or Recovery Path Disabled by Its Own Pause Gate
+
+- **D:** A pause flips a global gate (version sentinel, `paused` flag) that all normal flows check, but an emergency withdraw, rescue, or recovery function also runs that same gate, so the recovery path aborts exactly while the protocol is paused — when it is most needed
+- **FP:** Recovery and emergency functions use a dedicated "is paused" assertion (or no version gate at all) so they remain callable during the paused state, while still requiring the proper capability
+- **Search:** `emergency_*`, `rescue_*`, `emergent_*`, `recover_*`, `withdraw` functions and whether they call the same `checked_version`/`checked_package_version`/`assert_not_paused` helper that the pause action trips; trace the paused state value through that helper and confirm the recovery path is still reachable
+
+### 7.9 Non-Atomic Multi-Page Update of a Global Accounting Denominator
+
+- **D:** A paginated or multi-transaction admin update writes a global regime value (effective range, price anchor, rate) and the shared denominator (`total_share`, total stake) up front, but refreshes per-member contributions only `limit` at a time, leaving a window where settlement uses a mixed denominator: some members at new weight, others at stale weight
+- **FP:** The regime change and all dependent member weights are updated atomically, or settlement is frozen/snapshotted until pagination completes, so no reward or interest accrues against a mixed denominator
+- **Search:** paginated `update_*`/`migrate_*` loops with a `limit`/cursor that assign a global field (range, `sqrt_price`, `total_share`) before the loop and update member entries incrementally; check whether harvest/settle is reachable between pages and treat the mixed-denominator window as a validated consistency issue, not merely unvalidated

@@ -24,7 +24,7 @@
 
 - **D:** Missing checks for zero amounts, min or max bounds, identical in and out asset types in conversion flows, duplicate reward claims, or repeated voucher redemptions
 - **FP:** Every entrypoint asserts non-zero input, enforces bounds, rejects no-op self-conversion paths where relevant, and uses a consumed or spent flag or ID-based replay protection
-- **Search:** `assert!(amount > 0`, asset-type comparisons in swap or conversion flows, zero-value funding or deposit paths that still refresh timestamps or locks, and reward or claim functions missing ID deduplication
+- **Search:** `assert!(amount > 0`, asset-type comparisons in swap or conversion flows, zero-value funding or deposit paths that still refresh timestamps or locks, reward or claim functions missing ID deduplication, and sibling entrypoints (e.g., `add_x` vs `add_x_fix_coin`) where one enforces a non-zero or min-amount check that the other omits
 
 ### 3.5 Manipulable Fee / Reward Math
 
@@ -109,3 +109,15 @@
 - **D:** Privileged setter or configuration functions can write fees, leverage factors, curve parameters, liquidation thresholds, or similar economic values with no sanity bounds or cross-field consistency checks, making unsafe or illogical states reachable
 - **FP:** Every setter enforces documented min or max ranges, cross-field relationships, and non-zero or monotonicity constraints needed by downstream math and risk logic
 - **Search:** `set_`, `update_`, `configure_`, `bps`, `factor`, `curve`, `threshold`, `limit`, `timelock`, and whether setters assert acceptable ranges before storing values
+
+### 3.19 Fixed Accumulator Precision vs Base-Unit Denominator
+
+- **D:** A per-share or per-unit accumulator updates as `acc += scaled_numerator / denominator` where the `denominator` (pool share, total stake, supply) is denominated in raw token base units, and the only precision buffer is a single fixed constant (e.g., `REWARD_PRECISION = 1e12`). For high-decimal tokens the denominator can exceed the per-interval numerator, truncating the increment to `0`, so rewards or interest never accrue to users while the `released`/`owed` ledger keeps growing and the vault drains on paper
+- **FP:** The accumulator is scaled by a precision factor larger than the maximum plausible `denominator / numerator` ratio (commonly `1e18`+ with a `u256` intermediate), or value is computed per-read from `balance::value()` instead of an accumulator, and a test exercises an 18-decimal token with a small per-interval emission
+- **Search:** `acc_per_share`, `index +=`, `reward_delta / pool_share`, fixed `PRECISION`/`1e12` constants, and any division whose divisor is a base-unit balance, supply, or share; compute the actual increment for an 18-decimal, large-supply token and check whether it floors to `0`. Do not dismiss truncation as "dust" until the realistic magnitude is computed
+
+### 3.20 Missing Post-Condition After External State Mutation
+
+- **D:** A wrapper updates its own accounting or emits a success event based on an external module's side effect (liquidity added, balance moved, position changed) without asserting the side effect actually occurred or moved in the expected direction, so a downstream no-op or partial update is recorded as a successful state transition
+- **FP:** The wrapper re-reads the external state after the call and asserts the expected monotonic change (e.g., `new_liquidity > old_liquidity`, `received >= min_out`) before updating local accounting or emitting events
+- **Search:** calls to external `increase_*`/`decrease_*`/`swap`/`mint` followed by `get_*_info` reads, and whether an `assert!(new > old)` or amount-delta check guards the subsequent accounting update

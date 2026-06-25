@@ -57,8 +57,10 @@ For each reachable path, ask:
 - what assumptions does the code make about capability possession?
 - can helper functions be reached indirectly from attacker-callable paths?
 - can multiple functions be combined into a stronger exploit path?
+- does a sibling function performing the same operation differ in its arguments, guards, assertions, or events? Diff `collect_*`, `add_*`, `withdraw_*`, and `*_fix_*` pairs directly.
+- for each call into an external or unreadable dependency, is every forwarded argument the value the callee expects, and does the caller satisfy the callee's conventional precondition for `burn`/`destroy`/`close`/`swap`?
 
-Do not stop at single-function review. Sui issues often appear only when two or more safe-looking functions are composed.
+Do not stop at single-function review. Sui issues often appear only when two or more safe-looking functions are composed, or when a wrapper passes a wrong argument to or violates a precondition of an external call.
 
 ## 6. Validate before reporting
 
@@ -99,6 +101,11 @@ During this pass, explicitly check whether the package has any of the following 
 - bootstrap issuance or registry-reset paths that seed share supply, debt supply, or aggregate value from caller-controlled input when the current totals are zero
 - precision-sensitive math that divides before multiplying, rounding helpers that can overflow on intermediate addition, or piecewise or curve helpers that lack boundary and ordering validation
 - privileged setters that can write economically dangerous or illogical parameters with no sanity bounds
+- accumulator or index math whose fixed precision constant can truncate the per-interval increment to zero against a large base-unit denominator (compute the magnitude with an 18-decimal token before dismissing it)
+- value-moving or state-changing functions missing an event when a sibling operation emits one, built as an explicit function-vs-event matrix
+- wrappers that update local accounting or emit success on an external side effect without asserting the side effect occurred (e.g., no `new_liquidity > old_liquidity` check)
+- caller- or admin-supplied price, anchor, or rate inputs used for accounting that are only range-checked, not bound to the canonical on-chain source available in the same call
+- emergency, rescue, or recovery functions disabled by the same pause/version gate that the pause action trips
 
 Retain these issues as validated lower-severity findings when the code shows a concrete downside. Do not drop them solely because they are not the strongest issue on the path.
 
